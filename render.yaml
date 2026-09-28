@@ -2,7 +2,7 @@ services:
   - type: web
     name: saia
     runtime: python
-    plan: starter            # persistent disks require a paid instance
+    plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app --workers 1 --threads 4 --timeout 120 --bind 0.0.0.0:$PORT
     envVars:
@@ -14,9 +14,5 @@ services:
         value: admin
       - key: ADMIN_PASSWORD
         sync: false          # set in the Render dashboard
-      - key: DATA_DIR
-        value: /var/data
-    disk:
-      name: saia-data
-      mountPath: /var/data
-      sizeGB: 2
+      - key: DATABASE_URL
+        sync: false          # free Postgres connection string (Neon / Supabase)
