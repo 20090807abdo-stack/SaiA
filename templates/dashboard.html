@@ -53,6 +53,16 @@ td.ua{max-width:360px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
         <input id="f" type="file" name="file" accept=".exe" required></div>
       <button class="btn" type="submit">Upload and publish</button>
     </form>
+    <form class="card" method="post" action="{{ url_for('set_url') }}">
+      <h2>Installer link</h2>
+      <p class="hint">Recommended on Render: host the .exe on GitHub Releases and paste its link. It survives every restart.</p>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="field"><label for="v2">Version</label>
+        <input id="v2" type="text" name="version" placeholder="1.0.0" pattern="\d+(\.\d+){1,3}" required></div>
+      <div class="field"><label for="u2">Download link (https)</label>
+        <input id="u2" type="text" name="url" placeholder="https://github.com/.../SaiA_Setup_v1.0.0.exe" required></div>
+      <button class="btn" type="submit">Save link and publish</button>
+    </form>
     <div class="card">
       <h2>Export data</h2>
       <p class="hint">Includes every recorded download, newest first.</p>
