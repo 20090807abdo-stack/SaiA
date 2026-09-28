@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · SaiA{% endblock %}
+{% block css %}
+.top{display:flex;justify-content:space-between;align-items:center;padding:22px 0;border-bottom:1px solid var(--line);margin-bottom:36px}
+.top h1{font-size:26px}.top .r{display:flex;gap:10px;align-items:center}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:28px}
+.stat .v{font:600 44px/1 var(--serif);display:block;margin-bottom:6px}.stat .l{color:var(--mute);font-size:14px}
+.stat.file .v{font-size:26px}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px;margin-bottom:28px}
+.card h2{font-size:22px;margin-bottom:16px}
+.field{margin-bottom:14px}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.hint{color:var(--mute);font-size:13px;margin:0 0 14px}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:#fff}
+table{border-collapse:collapse;width:100%;font-size:13px;min-width:620px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--soft)}
+th{background:#efece5;font-weight:600}tr:last-child td{border-bottom:0}
+td.ua{max-width:360px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.empty{padding:28px;text-align:center;color:var(--mute)}
+{% endblock %}
+{% block body %}
+<div class="wrap">
+  <header class="top">
+    <h1>SaiA dashboard</h1>
+    <div class="r">
+      <a class="btn ghost sm" href="{{ url_for('index') }}">View site</a>
+      <form method="post" action="{{ url_for('logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button class="btn sm" type="submit">Sign out</button></form>
+    </div>
+  </header>
+
+  {% for cat, msg in get_flashed_messages(with_categories=true) %}<div class="flash {{ cat }}">{{ msg }}</div>{% endfor %}
+
+  <div class="stats">
+    <div class="card stat"><span class="v">{{ stats.total }}</span><span class="l">Total downloads</span></div>
+    <div class="card stat"><span class="v">{{ stats.today }}</span><span class="l">Downloads today</span></div>
+    <div class="card stat"><span class="v">{{ stats.week }}</span><span class="l">Downloads this week</span></div>
+    <div class="card stat file">
+      {% if active %}<span class="v">v{{ active.version_number }}</span>
+      <span class="l">{{ active.size_mb }} · released {{ active.upload_date.strftime('%b %d, %Y') }}</span>
+      {% else %}<span class="v">None</span><span class="l">No installer uploaded yet</span>{% endif %}
+    </div>
+  </div>
+
+  <div class="two">
+    <form class="card" method="post" action="{{ url_for('upload') }}" enctype="multipart/form-data">
+      <h2>Installer</h2>
+      <p class="hint">Uploading a new file replaces the live download and removes the previous one.</p>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="field"><label for="v">Version</label>
+        <input id="v" type="text" name="version" placeholder="1.0.0" pattern="\d+(\.\d+){1,3}" required></div>
+      <div class="field"><label for="f">Installer (.exe)</label>
+        <input id="f" type="file" name="file" accept=".exe" required></div>
+      <button class="btn" type="submit">Upload and publish</button>
+    </form>
+    <div class="card">
+      <h2>Export data</h2>
+      <p class="hint">Includes every recorded download, newest first.</p>
+      <div class="actions">
+        <a class="btn ghost" href="{{ url_for('export', fmt='xlsx') }}">Excel (.xlsx)</a>
+        <a class="btn ghost" href="{{ url_for('export', fmt='csv') }}">CSV</a>
+        <a class="btn ghost" href="{{ url_for('export', fmt='html') }}">HTML report</a>
+      </div>
+    </div>
+  </div>
+
+  <h2 style="font-size:22px;margin-bottom:14px">Download log</h2>
+  <div class="tablewrap" style="margin-bottom:64px">
+    {% if logs %}
+    <table><thead><tr><th>IP address</th><th>Country</th><th>Browser</th><th>Date &amp; time (UTC)</th></tr></thead><tbody>
+      {% for l in logs %}<tr><td>{{ l.ip_address }}</td><td>{{ l.country_code }}</td>
+        <td class="ua" title="{{ l.user_agent }}">{{ l.user_agent }}</td><td>{{ l.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td></tr>{% endfor %}
+    </tbody></table>
+    {% else %}<div class="empty">No downloads yet. They'll appear here as people install SaiA.</div>{% endif %}
+  </div>
+</div>
+{% endblock %}

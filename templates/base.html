@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}SaiA - System AI Assistant{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#f6f5f1;--card:#fffefb;--ink:#17171a;--mute:#6a6a72;--line:#17171a;--soft:#17171a1f;--ok:#2f6b4f;--err:#a3352b;
+--serif:"Playfair Display",Georgia,"Times New Roman",serif;--sans:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 var(--sans)}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.15;margin:0}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.wrap{max-width:1040px;margin:0 auto;padding:0 24px}
+.btn{display:inline-block;background:var(--ink);color:#fff;border:1px solid var(--ink);border-radius:999px;padding:13px 28px;
+font:500 15px var(--sans);text-decoration:none;cursor:pointer;transition:background .15s,color .15s}
+.btn:hover{background:transparent;color:var(--ink)}
+.btn.ghost{background:transparent;color:var(--ink)}.btn.ghost:hover{background:var(--ink);color:#fff}
+.btn.sm{padding:8px 18px;font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:28px}
+.flash{border:1px solid;border-radius:12px;padding:10px 16px;margin:16px 0;font-size:14px}
+.flash.error{color:var(--err);border-color:var(--err)}.flash.ok{color:var(--ok);border-color:var(--ok)}
+label{display:block;font-size:14px;font-weight:500;margin-bottom:6px}
+input[type=text],input[type=password],input[type=file]{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;
+background:#fff;font:inherit;color:inherit}
+input:invalid:not(:placeholder-shown){border-color:var(--err)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+{% block css %}{% endblock %}
+</style>
+</head>
+<body>
+{% block body %}{% endblock %}
+</body>
+</html>

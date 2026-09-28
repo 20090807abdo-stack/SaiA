@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block css %}
+.hero{padding:88px 0 72px;text-align:center}
+.badge{display:inline-block;background:var(--ink);color:#fff;border-radius:14px;padding:10px 20px;font:600 13px var(--sans);letter-spacing:.14em;margin-bottom:36px}
+.hero h1{font-size:clamp(38px,7vw,72px);max-width:14ch;margin:0 auto 20px}
+.hero .lead{max-width:60ch;margin:0 auto 34px;color:var(--mute);font:italic 20px/1.6 var(--serif)}
+.meta{margin-top:14px;color:var(--mute);font-size:13px}
+section{padding:72px 0;border-top:1px solid var(--soft)}
+section h2{font-size:clamp(28px,4vw,40px);margin-bottom:36px;max-width:22ch}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px}
+.mode .n{font:600 34px var(--serif);display:block;margin-bottom:10px}
+.mode h3{font-size:22px;margin-bottom:8px}.mode p{margin:0;color:var(--mute);font-size:15px}
+.steps{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-top:40px;font:500 20px var(--serif)}
+.steps span.s{border:1px solid var(--line);border-radius:999px;padding:10px 22px;background:var(--card)}
+.steps span.a{color:var(--mute)}
+.creator{display:flex;gap:22px;align-items:center;flex-wrap:wrap;max-width:560px}
+.avatar{width:64px;height:64px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font:600 28px var(--serif)}
+.creator h3{font-size:24px}.creator p{margin:2px 0 12px;color:var(--mute);font-size:15px}
+.mail{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:14px}
+footer{border-top:1px solid var(--line);padding:28px 0;font-size:14px;color:var(--mute)}
+footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+footer button{background:none;border:0;padding:0;font:inherit;color:var(--ink);text-decoration:underline;cursor:pointer;margin-left:16px}
+dialog{border:1px solid var(--line);border-radius:20px;max-width:560px;width:calc(100% - 32px);padding:32px;background:var(--card);color:var(--ink)}
+dialog::backdrop{background:#17171a66}
+dialog h2{font-size:28px;margin-bottom:14px}dialog p{font-size:15px;color:#3b3b42}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;border-radius:999px;padding:10px 22px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.on{opacity:1}
+{% endblock %}
+{% block body %}
+<main id="top">
+<header class="hero wrap">
+  <div class="badge">SaiA - SYSTEM AI ASSISTANT</div>
+  <h1>SaiA - System AI Assistant</h1>
+  <p class="lead">Welcome — this is your own corner of the computer. A quiet assistant that sits nearby, listens when you need it, and gets out of the way when you don't...</p>
+  {% for cat, msg in get_flashed_messages(with_categories=true) %}<div class="flash {{ cat }}" style="max-width:480px;margin:0 auto 20px">{{ msg }}</div>{% endfor %}
+  <a class="btn" href="{{ url_for('download_latest') }}">Download SaiA for Windows</a>
+  <div class="meta">{% if latest %}Version {{ latest.version_number }} · {{ latest.size_mb }} · Windows 10 or later{% else %}Installer coming soon{% endif %}</div>
+</header>
+
+<section><div class="wrap">
+  <h2>Three ways to reach it. One thing it does.</h2>
+  <div class="grid3">
+    <article class="card mode"><span class="n">01</span><h3>Full window</h3><p>A calm, roomy space for longer conversations and bigger tasks.</p></article>
+    <article class="card mode"><span class="n">02</span><h3>Floating orb</h3><p>A small orb that stays in view and opens the moment you call it.</p></article>
+    <article class="card mode"><span class="n">03</span><h3>Compact bar</h3><p>A slim bar for quick requests without leaving what you're doing.</p></article>
+  </div>
+  <div class="steps" aria-label="How it works">
+    <span class="s">Say what you need</span><span class="a" aria-hidden="true">→</span>
+    <span class="s">SaiA figures it out</span><span class="a" aria-hidden="true">→</span>
+    <span class="s">It just happens</span>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <h2>Behind SaiA</h2>
+  <div class="card creator">
+    <div class="avatar" aria-hidden="true">J</div>
+    <div>
+      <h3>Jamil</h3>
+      <p>Creator and developer of SaiA.</p>
+      <div class="mail"><span id="email">2009.08.07abdo@gmail.com</span>
+        <button class="btn ghost sm" type="button" id="copy">Copy email</button></div>
+    </div>
+  </div>
+</div></section>
+</main>
+
+<footer><div class="wrap">
+  <span>© {{ now_year }} SaiA - System AI Assistant</span>
+  <span><button data-open="terms">Terms of Service</button><button data-open="privacy">Privacy Policy</button></span>
+</div></footer>
+
+<dialog id="terms"><h2>Terms of Service</h2>
+  <p>SaiA is provided "as is", without warranty of any kind. You may install and use it on your own devices for personal or internal use. Do not redistribute, resell, or reverse-engineer the installer without written permission.</p>
+  <p>You are responsible for reviewing actions SaiA performs on your computer. The developer is not liable for data loss or damages resulting from use of the software. These terms may change; continued use means you accept the current version.</p>
+  <button class="btn sm" data-close>Close</button></dialog>
+<dialog id="privacy"><h2>Privacy Policy</h2>
+  <p>When you download SaiA, we record your IP address, browser user-agent, approximate country and the time of the download. This is used only to count downloads and understand usage, and is visible only to the site administrator.</p>
+  <p>This website sets no advertising or tracking cookies. Administrators use a single session cookie to sign in. To request removal of your download record, email the address listed on this page.</p>
+  <button class="btn sm" data-close>Close</button></dialog>
+<div class="toast" id="toast" role="status">Email copied</div>
+
+<script>
+document.querySelectorAll('[data-open]').forEach(function (b) {
+  b.onclick = function () { document.getElementById(b.dataset.open).showModal(); };
+});
+document.querySelectorAll('[data-close]').forEach(function (b) { b.onclick = function () { b.closest('dialog').close(); }; });
+document.querySelectorAll('dialog').forEach(function (d) {
+  d.addEventListener('click', function (e) { if (e.target === d) d.close(); });
+});
+document.getElementById('copy').onclick = function () {
+  var t = document.getElementById('email').textContent, done = function () {
+    var el = document.getElementById('toast'); el.classList.add('on'); setTimeout(function () { el.classList.remove('on'); }, 1800); };
+  if (navigator.clipboard) navigator.clipboard.writeText(t).then(done);
+  else { var r = document.createRange(); r.selectNode(document.getElementById('email')); getSelection().removeAllRanges(); getSelection().addRange(r); document.execCommand('copy'); done(); }
+};
+</script>
+{% endblock %}
