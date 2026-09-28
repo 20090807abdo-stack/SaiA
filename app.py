@@ -37,11 +37,19 @@ def _secret_key():
     return key
 
 
+def _db_uri():
+    url = os.environ.get("DATABASE_URL")  # e.g. free Postgres on Neon/Supabase: survives Render restarts
+    if url:
+        return url.replace("postgres://", "postgresql://", 1)
+    return "sqlite:///" + os.path.join(DATA_DIR, "saia.db")
+
+
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 app.config.update(
     SECRET_KEY=_secret_key(),
-    SQLALCHEMY_DATABASE_URI="sqlite:///" + os.path.join(DATA_DIR, "saia.db"),
+    SQLALCHEMY_DATABASE_URI=_db_uri(),
+    SQLALCHEMY_ENGINE_OPTIONS={"pool_pre_ping": True, "pool_recycle": 280},
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
     MAX_CONTENT_LENGTH=int(os.environ.get("MAX_UPLOAD_MB", 300)) * 1024 * 1024,
     SESSION_COOKIE_HTTPONLY=True,
@@ -78,6 +86,8 @@ class AppVersion(db.Model):
 
     @property
     def size_mb(self):
+        if self.file_path.startswith("https://"):
+            return "hosted externally"
         try:
             return f"{os.path.getsize(self.file_path) / 1048576:.1f} MB"
         except OSError:
@@ -86,17 +96,22 @@ class AppVersion(db.Model):
 
 # ---------------------------------------------------------------- setup
 def ensure_admin():
-    if User.query.first():
-        return
     username = os.environ.get("ADMIN_USERNAME", "admin")
     password = os.environ.get("ADMIN_PASSWORD")
-    generated = not password
-    if generated:
-        password = secrets.token_urlsafe(12)
+    if password:  # env var is the source of truth: same login after every restart/redeploy
+        user = User.query.filter_by(username=username).first()
+        if not user:
+            db.session.add(User(username=username, password_hash=generate_password_hash(password)))
+        elif not check_password_hash(user.password_hash, password):
+            user.password_hash = generate_password_hash(password)
+        db.session.commit()
+        return
+    if User.query.first():
+        return
+    password = secrets.token_urlsafe(12)
     db.session.add(User(username=username, password_hash=generate_password_hash(password)))
     db.session.commit()
-    if generated:
-        print(f"[SaiA] Admin created. username={username} password={password} (change ASAP)", flush=True)
+    print(f"[SaiA] Admin created. username={username} password={password} (set ADMIN_PASSWORD to fix it)", flush=True)
 
 
 with app.app_context():
@@ -174,7 +189,7 @@ def index():
 @app.route("/download/latest")
 def download_latest():
     ver = AppVersion.query.filter_by(is_active=True).first()
-    if not ver or not os.path.isfile(ver.file_path):
+    if not ver or not (ver.file_path.startswith("https://") or os.path.isfile(ver.file_path)):
         flash("The installer isn't available right now. Please check back soon.", "error")
         return redirect(url_for("index") + "#top")
     db.session.add(DownloadAnalytics(
@@ -183,6 +198,8 @@ def download_latest():
         country_code=(request.headers.get("CF-IPCountry")
                       or request.headers.get("X-Country-Code") or "--")[:8]))
     db.session.commit()
+    if ver.file_path.startswith("https://"):
+        return redirect(ver.file_path)
     return send_file(ver.file_path, as_attachment=True,
                      download_name=f"SaiA_Setup_v{ver.version_number}.exe",
                      mimetype="application/octet-stream")
@@ -263,6 +280,25 @@ def upload():
     return redirect(url_for("dashboard"))
 
 
+@app.route("/admin/set-url", methods=["POST"])
+@login_required
+def set_url():
+    version = request.form.get("version", "").strip()
+    url = request.form.get("url", "").strip()
+    if not re.fullmatch(r"\d+(\.\d+){1,3}", version):
+        flash("Version must look like 1.0.0.", "error")
+    elif not re.fullmatch(r"https://[^\s\"'<>]+", url):
+        flash("Enter a full https:// link to the installer.", "error")
+    else:
+        for old in AppVersion.query.filter_by(is_active=True).all():
+            old.is_active = False
+        db.session.add(AppVersion(version_number=version, filename=f"SaiA_Setup_v{version}.exe",
+                                  file_path=url, is_active=True))
+        db.session.commit()
+        flash(f"Version {version} is now live.", "ok")
+    return redirect(url_for("dashboard"))
+
+
 def _safe_cell(v):
     v = "" if v is None else str(v)
     return "'" + v if v[:1] in "=+-@\t\r" else v  # block spreadsheet formula injection
@@ -325,4 +361,4 @@ def too_large(_):
 
 
 if __name__ == "__main__":
-    app.run(debug=False, port=int(os.environ.get("PORT", 5000)),host="0.0.0.0")
+    app.run(debug=False, port=int(os.environ.get("PORT", 5000)))
