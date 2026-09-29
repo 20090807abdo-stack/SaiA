@@ -37,7 +37,7 @@ td.ua{max-width:360px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     <div class="card stat"><span class="v">{{ stats.week }}</span><span class="l">Downloads this week</span></div>
     <div class="card stat file">
       {% if active %}<span class="v">v{{ active.version_number }}</span>
-      <span class="l">{{ active.size_mb }} · released {{ active.upload_date.strftime('%b %d, %Y') }}</span>
+      <span class="l">{{ active.size_mb }}{% if active.upload_date %} · released {{ active.upload_date.strftime('%b %d, %Y') }}{% endif %}</span>
       {% else %}<span class="v">None</span><span class="l">No installer uploaded yet</span>{% endif %}
     </div>
   </div>
