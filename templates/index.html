@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block css %}
 .hero{padding:88px 0 72px;text-align:center}
-.badge{display:inline-block;background:var(--ink);color:#fff;border-radius:14px;padding:10px 20px;font:600 13px var(--sans);letter-spacing:.14em;margin-bottom:36px}
+.badge-logo{width:104px;height:auto;border-radius:18px;margin-bottom:32px;box-shadow:0 6px 20px #17171a26}
 .hero h1{font-size:clamp(38px,7vw,72px);max-width:14ch;margin:0 auto 20px}
 .hero .lead{max-width:60ch;margin:0 auto 34px;color:var(--mute);font:italic 20px/1.6 var(--serif)}
 .meta{margin-top:14px;color:var(--mute);font-size:13px}
@@ -29,7 +29,7 @@ dialog h2{font-size:28px;margin-bottom:14px}dialog p{font-size:15px;color:#3b3b4
 {% block body %}
 <main id="top">
 <header class="hero wrap">
-  <div class="badge">SaiA - SYSTEM AI ASSISTANT</div>
+  <img class="badge-logo" src="{{ url_for('static', filename='logo.png') }}" alt="SaiA - System AI Assistant logo">
   <h1>SaiA - System AI Assistant</h1>
   <p class="lead">Welcome — this is your own corner of the computer. A quiet assistant that sits nearby, listens when you need it, and gets out of the way when you don't...</p>
   {% for cat, msg in get_flashed_messages(with_categories=true) %}<div class="flash {{ cat }}" style="max-width:480px;margin:0 auto 20px">{{ msg }}</div>{% endfor %}
